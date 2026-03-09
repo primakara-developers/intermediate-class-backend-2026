@@ -1,0 +1,16 @@
+{
+  "name": "primdev-library-api-intermediate-be-2026",
+  "version": "1.0.0",
+  "description": "primdev intermediate class back-end 2026 project",
+  "license": "ISC",
+  "author": "Adi Aryasuta",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
