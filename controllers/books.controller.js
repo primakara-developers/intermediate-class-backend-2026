@@ -1,4 +1,5 @@
 import prisma from '../configs/database.config.js'
+import { isCategoryExist } from './categories.controllers.js'
 
 export const getBooks = async (req, res) => {
   // Mengambil semua buku dari database menggunakan Prisma Client
@@ -40,11 +41,22 @@ export const getBookById = async (req, res) => {
 
 export const createBook = async (req, res) => {
   // Mendapatkan data buku baru dari request body
-  const { title, author, year } = req.body
+  const { categoryId, title, author, year } = req.body
+
+  // Mengecek apakah kategori dengan ID yang diberikan ada di database menggunakan fungsi isCategoryExist
+  const categoryExists = await isCategoryExist(categoryId)
+
+  if (!categoryExists) {
+    return res.json({
+      success: false,
+      message: `Category with ID: ${categoryId} not found`,
+    })
+  }
 
   // Menambahkan buku baru ke database menggunakan Prisma Client
   const book = await prisma.books.create({
     data: {
+      categoryId,
       title,
       author,
       year,
@@ -64,7 +76,7 @@ export const updateBook = async (req, res) => {
   const id = parseInt(req.params.id)
 
   // Mendapatkan data buku yang akan diupdate dari request body
-  const { title, author, year } = req.body
+  const { categoryId, title, author, year } = req.body
 
   // Mencari buku dengan ID yang sesuai di database menggunakan Prisma Client
   const book = await prisma.books.findUnique({
@@ -81,12 +93,22 @@ export const updateBook = async (req, res) => {
     })
   }
 
+  const categoryExists = await isCategoryExist(categoryId)
+
+  if (!categoryExists) {
+    return res.json({
+      success: false,
+      message: `Category with ID: ${categoryId} not found`,
+    })
+  }
+
   // Mengupdate buku dengan ID yang sesuai di database menggunakan Prisma Client
   await prisma.books.update({
     where: {
       id: id,
     },
     data: {
+      categoryId,
       title,
       author,
       year,
