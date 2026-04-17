@@ -154,3 +154,14 @@ export const deleteBook = async (req, res) => {
     message: 'Book deleted successfully',
   })
 }
+
+export const isBookExist = async (id) => {
+  // Mencari buku dengan ID yang sesuai di database menggunakan Prisma Client
+  const book = await prisma.books.findUnique({
+    where: {
+      id: id,
+    },
+  })
+
+  return !!book
+}
