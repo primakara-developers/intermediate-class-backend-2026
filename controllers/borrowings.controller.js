@@ -31,6 +31,7 @@ export const getBorrowingById = async (req, res) => {
     },
   })
 
+  // Jika peminjaman tidak ditemukan, kirimkan pesan error
   if (!borrowing) {
     return res.json({
       success: false,
