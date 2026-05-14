@@ -1,3 +1,4 @@
+import express from 'express'
 import {
   createBorrowing,
   deleteBorrowing,
@@ -5,7 +6,6 @@ import {
   getBorrowingById,
   returnBook,
 } from '../controllers/borrowings.controller.js'
-import express from 'express'
 
 const router = express.Router()
 

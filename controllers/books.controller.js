@@ -1,3 +1,4 @@
+import { validationResult } from 'express-validator'
 import prisma from '../configs/database.config.js'
 import { isCategoryExist } from './categories.controllers.js'
 
@@ -5,7 +6,7 @@ export const getBooks = async (req, res) => {
   // Mengambil semua buku dari database menggunakan Prisma Client
   const books = await prisma.books.findMany()
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'Books retrieved successfully',
     data: books,
@@ -26,13 +27,13 @@ export const getBookById = async (req, res) => {
 
   // Jika buku tidak ditemukan, kirimkan pesan error
   if (!book) {
-    return res.json({
+    return res.status(404).json({
       success: false,
       message: `Book with ID: ${id} not found`,
     })
   }
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'Book retrieved successfully',
     data: book,
@@ -40,6 +41,16 @@ export const getBookById = async (req, res) => {
 }
 
 export const createBook = async (req, res) => {
+  const validationErrors = validationResult(req)
+
+  if (!validationErrors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation error',
+      errors: validationErrors.array(),
+    })
+  }
+
   // Mendapatkan data buku baru dari request body
   const { categoryId, title, author, year } = req.body
 
@@ -47,7 +58,7 @@ export const createBook = async (req, res) => {
   const categoryExists = await isCategoryExist(categoryId)
 
   if (!categoryExists) {
-    return res.json({
+    return res.status(404).json({
       success: false,
       message: `Category with ID: ${categoryId} not found`,
     })
@@ -63,7 +74,7 @@ export const createBook = async (req, res) => {
     },
   })
 
-  res.json({
+  res.status(201).json({
     success: true,
     message: 'Book created successfully',
     data: book,
@@ -71,6 +82,16 @@ export const createBook = async (req, res) => {
 }
 
 export const updateBook = async (req, res) => {
+  const validationErrors = validationResult(req)
+
+  if (!validationErrors.isEmpty()) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation error',
+      errors: validationErrors.array(),
+    })
+  }
+
   // Mendapatkan ID buku yang akan diupdate dari parameter URL
   // Lalu mengubahnya menjadi tipe data integer menggunakan parseInt
   const id = parseInt(req.params.id)
@@ -87,7 +108,7 @@ export const updateBook = async (req, res) => {
 
   // Jika buku tidak ditemukan, kirimkan pesan error
   if (!book) {
-    return res.json({
+    return res.status(404).json({
       success: false,
       message: `Book with ID: ${id} not found`,
     })
@@ -96,7 +117,7 @@ export const updateBook = async (req, res) => {
   const categoryExists = await isCategoryExist(categoryId)
 
   if (!categoryExists) {
-    return res.json({
+    return res.status(404).json({
       success: false,
       message: `Category with ID: ${categoryId} not found`,
     })
@@ -115,7 +136,7 @@ export const updateBook = async (req, res) => {
     },
   })
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'Book updated successfully',
     data: book,
@@ -136,7 +157,7 @@ export const deleteBook = async (req, res) => {
 
   // Jika buku tidak ditemukan, kirimkan pesan error
   if (!book) {
-    return res.json({
+    return res.status(404).json({
       success: false,
       message: `Book with ID: ${id} not found`,
     })
@@ -149,7 +170,7 @@ export const deleteBook = async (req, res) => {
     },
   })
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'Book deleted successfully',
   })

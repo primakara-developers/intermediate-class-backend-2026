@@ -4,7 +4,7 @@ export const getUsers = async (req, res) => {
   // Mengambil semua pengguna dari database menggunakan Prisma Client
   const users = await prisma.users.findMany()
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'Users retrieved successfully',
     data: users,
@@ -29,14 +29,13 @@ export const getUserByIdWithProfile = async (req, res) => {
 
   // Jika pengguna tidak ditemukan, kirimkan pesan error
   if (!user) {
-    res.json({
+    return res.status(404).json({
       success: false,
       message: `User with ID: ${id} not found`,
     })
-    return
   }
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'User retrieved successfully',
     data: user,
@@ -57,14 +56,13 @@ export const getUserById = async (req, res) => {
 
   // Jika pengguna tidak ditemukan, kirimkan pesan error
   if (!user) {
-    res.json({
+    return res.status(404).json({
       success: false,
       message: `User with ID: ${id} not found`,
     })
-    return
   }
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'User retrieved successfully',
     data: user,
@@ -85,7 +83,7 @@ export const createUser = async (req, res) => {
     },
   })
 
-  res.json({
+  res.status(201).json({
     success: true,
     message: 'User created successfully',
     data: user,
@@ -109,11 +107,10 @@ export const updateUser = async (req, res) => {
 
   // Jika pengguna tidak ditemukan, kirimkan pesan error
   if (!user) {
-    res.json({
+    return res.status(404).json({
       success: false,
       message: `User with ID: ${id} not found`,
     })
-    return
   }
 
   // Mengupdate pengguna dengan ID yang sesuai di database menggunakan Prisma Client
@@ -129,7 +126,7 @@ export const updateUser = async (req, res) => {
     },
   })
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'User updated successfully',
     data: user,
@@ -150,11 +147,10 @@ export const deleteUser = async (req, res) => {
 
   // Jika pengguna tidak ditemukan, kirimkan pesan error
   if (!user) {
-    res.json({
+    return res.status(404).json({
       success: false,
       message: `User with ID: ${id} not found`,
     })
-    return
   }
 
   // Menghapus pengguna dengan ID yang sesuai di database menggunakan Prisma Client
@@ -164,7 +160,7 @@ export const deleteUser = async (req, res) => {
     },
   })
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'User deleted successfully',
   })

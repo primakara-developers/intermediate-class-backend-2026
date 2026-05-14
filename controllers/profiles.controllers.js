@@ -3,7 +3,7 @@ import prisma from '../configs/database.config.js'
 export const getAllProfiles = async (req, res) => {
   const profiles = await prisma.profiles.findMany()
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'Profiles retrieved successfully',
     data: profiles,
@@ -24,13 +24,13 @@ export const getProfileById = async (req, res) => {
 
   // Jika profil tidak ditemukan, kirimkan pesan error
   if (!profile) {
-    return res.json({
+    return res.status(404).json({
       success: false,
       message: `Profile with ID: ${id} not found`,
     })
   }
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'Profile retrieved successfully',
     data: profile,
@@ -50,7 +50,7 @@ export const createProfile = async (req, res) => {
     },
   })
 
-  res.json({
+  res.status(201).json({
     success: true,
     message: 'Profile created successfully',
     data: profile,
@@ -74,7 +74,7 @@ export const updateProfile = async (req, res) => {
 
   // Jika profil tidak ditemukan, kirimkan pesan error
   if (!profile) {
-    return res.json({
+    return res.status(404).json({
       success: false,
       message: `Profile with ID: ${id} not found`,
     })
@@ -90,7 +90,7 @@ export const updateProfile = async (req, res) => {
     },
   })
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'Profile updated successfully',
     data: profile,
@@ -111,7 +111,7 @@ export const deleteProfile = async (req, res) => {
 
   // Jika profil tidak ditemukan, kirimkan pesan error
   if (!profile) {
-    return res.json({
+    return res.status(404).json({
       success: false,
       message: `Profile with ID: ${id} not found`,
     })
@@ -124,7 +124,7 @@ export const deleteProfile = async (req, res) => {
     },
   })
 
-  res.json({
+  res.status(200).json({
     success: true,
     message: 'Profile deleted successfully',
   })
