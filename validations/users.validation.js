@@ -35,3 +35,5 @@ const updateUserValidation = [
     .isIn(['ADMIN', 'USER'])
     .withMessage('Role must be either ADMIN or USER'),
 ]
+
+export { userValidation, updateUserValidation }

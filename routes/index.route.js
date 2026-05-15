@@ -7,11 +7,21 @@ import borrowingsRoute from './borrowings.route.js'
 import categoriesRoute from './categories.routes.js'
 import profilesRoute from './profiles.routes.js'
 import usersRoute from './users.route.js'
+import logger from '../configs/logger.config.js'
 
 const router = express.Router()
 
 router.get('/', (req, res) => {
+  logger.debug('GET / - Welcome route')
   res.send('Welcome to the API Library')
+})
+
+router.use((req, res, next) => {
+  logger.debug(
+    { method: req.method, path: req.path, ip: req.ip },
+    'Incoming request',
+  )
+  next()
 })
 
 router.use('/auth', authRoute)
