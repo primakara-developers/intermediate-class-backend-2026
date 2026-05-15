@@ -1,15 +1,30 @@
 import prisma from '../configs/database.config.js'
+import 'dotenv/config'
+import bcrypt from 'bcryptjs'
 
 async function main() {
   console.log('Memulai proses seeding...')
 
-  // 1. Bersihkan database (Optional, tapi disarankan agar tidak duplikat saat rerunning)
-  // Urutan delete penting karena Foreign Key constraints
-  await prisma.borrowings.deleteMany()
-  await prisma.books.deleteMany()
-  await prisma.categories.deleteMany()
-  await prisma.profiles.deleteMany()
-  await prisma.users.deleteMany()
+  const saltRounds = parseInt(process.env.BCRYPT_SALT_ROUNDS)
+  const password = 'password'
+  const hashedPassword = await bcrypt.hash(password, saltRounds)
+
+  // 1. Bersihkan database & Reset Primary Keys (PostgreSQL Specific)
+  // TRUNCATE lebih cepat dari DELETE.
+  // CASCADE mengabaikan urutan Foreign Key.
+  // RESTART IDENTITY mengembalikan auto-increment ke 1.
+  await prisma.$executeRawUnsafe(
+    `TRUNCATE TABLE "Borrowings", "Books", "Categories", "Profiles", "Users" RESTART IDENTITY CASCADE;`,
+  )
+
+  await prisma.users.create({
+    data: {
+      name: 'Admin',
+      email: 'admin@example.com',
+      password: hashedPassword,
+      role: 'ADMIN',
+    },
+  })
 
   // 2. Seed Users (20 Data)
   const users = []
@@ -18,8 +33,8 @@ async function main() {
       data: {
         name: `User Ke-${i}`,
         email: `user${i}@example.com`,
-        password: 'hashed_password_123', // Di dunia nyata, gunakan bcrypt
-        role: i === 1 ? 'ADMIN' : 'USER',
+        password: hashedPassword,
+        role: 'USER',
       },
     })
     users.push(user)
@@ -68,13 +83,15 @@ async function main() {
   for (let i = 1; i <= 30; i++) {
     const randomCategory =
       categories[Math.floor(Math.random() * categories.length)]
+
+    // cloudinaryId dibiarkan kosong (undefined secara default di Prisma)
     const book = await prisma.books.create({
       data: {
         title: `Judul Buku Masterpiece Vol. ${i}`,
         author: `Penulis Terkenal ${String.fromCharCode(65 + (i % 26))}`,
         year: 2000 + (i % 24),
         categoryId: randomCategory.id,
-        available: i % 5 !== 0, // Sisipkan beberapa buku yang tidak tersedia
+        available: i % 5 !== 0,
       },
     })
     books.push(book)
@@ -90,7 +107,7 @@ async function main() {
         userId: randomUser.id,
         bookId: randomBook.id,
         borrow_date: new Date(2026, 0, i + 1),
-        returned_at: i % 3 === 0 ? new Date(2026, 1, i + 1) : null, // Ada yang sudah balik, ada yang belum
+        returned_at: i % 3 === 0 ? new Date(2026, 1, i + 1) : null,
       },
     })
   }

@@ -34,15 +34,16 @@ model Profiles {
 }
 
 model Books {
-  id         Int          @id @default(autoincrement())
-  categoryId Int?
-  title      String
-  author     String
-  year       Int
-  available  Boolean      @default(true)
-  createdAt  DateTime     @default(now())
-  categories Categories?  @relation(fields: [categoryId], references: [id])
-  borrowings Borrowings[]
+  id           Int          @id @default(autoincrement())
+  categoryId   Int?
+  title        String
+  author       String
+  year         Int
+  available    Boolean      @default(true)
+  cloudinaryId String? // Untuk menyimpan public_id dari Cloudinary
+  createdAt    DateTime     @default(now())
+  category     Categories?  @relation(fields: [categoryId], references: [id])
+  borrowings   Borrowings[]
 }
 
 model Categories {

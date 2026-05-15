@@ -1,10 +1,20 @@
 import { validationResult } from 'express-validator'
 import prisma from '../configs/database.config.js'
 import { isCategoryExist } from './categories.controllers.js'
+import { deleteFile, getFileUrl, uploadFile } from './cloudinary.controller.js'
 
 export const getBooks = async (req, res) => {
   // Mengambil semua buku dari database menggunakan Prisma Client
   const books = await prisma.books.findMany()
+
+  // add coverUrl to each book
+  books.forEach((book) => {
+    if (!book.cloudinaryId) {
+      book.coverUrl = null
+    }
+
+    book.coverUrl = getFileUrl(book.cloudinaryId)
+  })
 
   res.status(200).json({
     success: true,
@@ -31,6 +41,12 @@ export const getBookById = async (req, res) => {
       success: false,
       message: `Book with ID: ${id} not found`,
     })
+  }
+
+  if (book.cloudinaryId) {
+    book.coverUrl = getFileUrl(book.cloudinaryId)
+  } else {
+    book.coverUrl = null
   }
 
   res.status(200).json({
@@ -64,6 +80,15 @@ export const createBook = async (req, res) => {
     })
   }
 
+  const cover = req.file
+  let cloudinaryId = null
+
+  if (cover) {
+    const result = await uploadFile(cover)
+
+    cloudinaryId = result.public_id
+  }
+
   // Menambahkan buku baru ke database menggunakan Prisma Client
   const book = await prisma.books.create({
     data: {
@@ -71,6 +96,7 @@ export const createBook = async (req, res) => {
       title,
       author,
       year,
+      cloudinaryId,
     },
   })
 
@@ -114,6 +140,7 @@ export const updateBook = async (req, res) => {
     })
   }
 
+  if (categoryId) {
   const categoryExists = await isCategoryExist(categoryId)
 
   if (!categoryExists) {
@@ -121,6 +148,22 @@ export const updateBook = async (req, res) => {
       success: false,
       message: `Category with ID: ${categoryId} not found`,
     })
+    }
+  }
+
+  const cover = req.file
+  let cloudinaryId = book.cloudinaryId
+
+  // Jika ada file cover yang diunggah, unggah ke Cloudinary dan dapatkan public_id-nya
+  if (cover) {
+    // Jika buku sudah memiliki cover sebelumnya,
+    // hapus file cover lama dari Cloudinary menggunakan public_id yang disimpan di database
+    if (book.cloudinaryId) {
+      const deleted = await deleteFile(book.cloudinaryId)
+    }
+
+    const result = await uploadFile(cover)
+    cloudinaryId = result.public_id
   }
 
   // Mengupdate buku dengan ID yang sesuai di database menggunakan Prisma Client
@@ -133,6 +176,7 @@ export const updateBook = async (req, res) => {
       title,
       author,
       year,
+      cloudinaryId,
     },
   })
 
@@ -161,6 +205,12 @@ export const deleteBook = async (req, res) => {
       success: false,
       message: `Book with ID: ${id} not found`,
     })
+  }
+
+  // Jika buku memiliki cover yang diunggah ke Cloudinary,
+  // hapus file cover tersebut dari Cloudinary menggunakan public_id yang disimpan di database
+  if (book.cloudinaryId) {
+    const deleted = await deleteFile(book.cloudinaryId)
   }
 
   // Menghapus buku dengan ID yang sesuai di database menggunakan Prisma Client
